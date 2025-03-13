@@ -5,10 +5,15 @@ call plug#begin()
 
 " List your plugins here
 "Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'https://github.com/rafikdraoui/jj-diffconflicts.git'
+Plug 'https://github.com/romainl/vim-qf.git'
 Plug 'morhetz/gruvbox'
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-dadbod'
+Plug 'kristijanhusak/vim-dadbod-ui'
+Plug 'vim-scripts/dbext.vim'
 Plug 'morhetz/gruvbox'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.6' }
@@ -27,8 +32,69 @@ Plug 'preservim/tagbar'
 Plug 'wfxr/minimap.vim'
 Plug 'terrastruct/d2-vim'
 Plug 'vim-test/vim-test'
+Plug 'https://git.sr.ht/~whynothugo/lsp_lines.nvim'
+Plug 'olimorris/codecompanion.nvim'
 call plug#end()
 
+"=====================================
+" codecompanion
+"=====================================
+lua << EOF
+  require("codecompanion").setup({
+    adapters = {
+    llama3 = function()
+      return require("codecompanion.adapters").extend("ollama", {
+        name = "llama3", -- Give this adapter a different name to differentiate it from the default ollama adapter
+        schema = {
+          model = {
+            default = "llama3.2",
+          },
+          num_ctx = {
+            default = 16384,
+          },
+          num_predict = {
+            default = -1,
+          },
+        },
+      })
+    end,
+    deepseek = function()
+      return require("codecompanion.adapters").extend("ollama", {
+        name = "deepseek", -- Give this adapter a different name to differentiate it from the default ollama adapter
+        schema = {
+          model = {
+            default = "deepseek-r1",
+          },
+          num_ctx = {
+            default = 16384,
+          },
+          num_predict = {
+            default = -1,
+          },
+        },
+      })
+    end,
+    qwen = function()
+      return require("codecompanion.adapters").extend("ollama", {
+        name = "qwen", -- Give this adapter a different name to differentiate it from the default ollama adapter
+        schema = {
+          model = {
+            default = "qwen2.5-coder:3b",
+          },
+        },
+      })
+    end,
+  },
+    strategies = {
+      chat = {
+        adapter = "deepseek",
+      },
+      inline = {
+        adapter = "qwen",
+      },
+    },
+  })
+EOF
 "=====================================
 " Theming
 "=====================================
@@ -102,12 +168,11 @@ nnoremap <leader>R <cmd>Telescope lsp_references<cr>
 "vim-test
 nmap <silent> <leader>t :TestNearest<CR>
 nmap <silent> <leader>T :TestFile<CR>
-"nmap <silent> <leader>a :TestSuite<CR>
-"nmap <silent> <leader>l :TestLast<CR>
-"nmap <silent> <leader>g :TestVisit<CR>
+let g:test#python#pytest#options = "--no-cov -v"
 "=====================================
 " ALE
 "=====================================
+let g:ale_python_black_options='--line-length=100' 
 let g:ale_fixers = { 'python': ['autoimport', 'isort', 'black'], 'terraform': ['terraform'], }
 let g:ale_fix_on_save = 1
 
